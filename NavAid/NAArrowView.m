@@ -18,6 +18,8 @@
 @property (strong, nonatomic) CALayer *left;
 @property (strong, nonatomic) CALayer *right;
 @property (strong, nonatomic) CALayer *back;
+@property (strong, nonatomic) CALayer *backLeft;
+@property (strong, nonatomic) CALayer *backRight;
 
 @property (strong, nonatomic) UIColor *borderColor;
 @property (assign, nonatomic) CGFloat cornerRadius;
@@ -65,7 +67,8 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
         [self rebuild];
         
         self.locManager = [CLLocationManager new];
-        [self prepareAndStartLocationManager:self.locManager withDelegate:self];
+        [self prepareAndStartLocationManager:self.locManager
+                                withDelegate:self];
         
         self.motionManager = [CMMotionManager new];
         [self.motionManager startDeviceMotionUpdates];
@@ -91,12 +94,26 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
     }
     
     [self buildLayers:self.frame];
+    
     [self.layer addSublayer:self.container];
     [self.container addSublayer:self.top];
     [self.container addSublayer:self.bottom];
     [self.container addSublayer:self.left];
     [self.container addSublayer:self.right];
-    [self.container addSublayer:self.back];
+    [self.container addSublayer:self.backLeft];
+    [self.container addSublayer:self.backRight];
+
+    for (CALayer *layer in self.container.sublayers) {
+        [self modifyLayer:layer
+              withBGColor:self.color
+              borderColor:self.borderColor
+              borderWidth:self.borderWidth
+             cornerRadius:self.cornerRadius
+                  opacity:self.opacity];
+        layer.shouldRasterize = YES;
+        layer.drawsAsynchronously = YES;
+    }
+    
     self.shouldRebuild = NO;
 }
 
@@ -136,7 +153,8 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
     [shapePath addLineToPoint:CGPointMake(layer.frame.size.width,
                                           layer.frame.size.height)];
     [shapePath addLineToPoint:CGPointMake(layer.frame.size.width / 2.0,
-                                          3.0 * layer.frame.size.height / 4.0)];
+                                          3.0 * layer.frame.size.height /
+                                          4.0)];
     [shapePath addLineToPoint:CGPointMake(0,
                                           layer.frame.size.height)];
     
@@ -150,8 +168,10 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 {
     CGPoint newPoint = CGPointMake(layer.bounds.size.width * anchorPoint.x,
                                    layer.bounds.size.height * anchorPoint.y);
-    CGPoint oldPoint = CGPointMake(layer.bounds.size.width * layer.anchorPoint.x,
-                                   layer.bounds.size.height * layer.anchorPoint.y);
+    CGPoint oldPoint = CGPointMake(layer.bounds.size.width *
+                                   layer.anchorPoint.x,
+                                   layer.bounds.size.height *
+                                   layer.anchorPoint.y);
     
     CGPoint position = layer.position;
     
@@ -182,8 +202,11 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
     self.right = [CALayer layer];
     [self buildRightLayer:self.right withFrame:frame];
     
-    self.back = [CALayer layer];
-    [self buildBackLayer:self.back withFrame:frame];
+    self.backLeft = [CALayer layer];
+    [self buildBackLeftLayer:self.backLeft withFrame:frame];
+    
+    self.backRight = [CALayer layer];
+    [self buildBackRightLayer:self.backRight withFrame:frame];
 }
 
 - (void)modifyLayer:(CALayer *)layer
@@ -208,13 +231,6 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 
 - (void)buildTopLayer:(CAShapeLayer *)top withFrame:(CGRect)frame
 {
-    [self modifyLayer:top
-          withBGColor:self.color
-          borderColor:self.borderColor
-          borderWidth:self.borderWidth
-         cornerRadius:self.cornerRadius
-              opacity:self.opacity];
-    
     top.transform = CATransform3DMakeTranslation(0, 0, self.thickness / 2.0);
     top.frame = CGRectForm(CGPointMake(0, 0), frame.size);
     
@@ -223,14 +239,8 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 
 - (void)buildBottomLayer:(CAShapeLayer *)bottom withFrame:(CGRect)frame
 {
-    [self modifyLayer:bottom
-          withBGColor:self.color
-          borderColor:self.borderColor
-          borderWidth:self.borderWidth
-         cornerRadius:self.cornerRadius
-              opacity:self.opacity];
-    
-    bottom.transform = CATransform3DMakeTranslation(0, 0, -self.thickness / 2.0);
+    bottom.transform =
+    CATransform3DMakeTranslation(0, 0, -self.thickness / 2.0);
     bottom.frame = CGRectForm(CGPointMake(0, 0), frame.size);
     
     [self addArrowMaskToShapeLayer:bottom];
@@ -238,13 +248,6 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 
 - (void)buildLeftLayer:(CALayer *)left withFrame:(CGRect)frame
 {
-    [self modifyLayer:left
-          withBGColor:self.color
-          borderColor:self.borderColor
-          borderWidth:self.borderWidth
-         cornerRadius:self.cornerRadius
-              opacity:self.opacity];
-    
     CGFloat hypot = hypotf(frame.size.height, frame.size.width/2.0);
     left.frame = CGRectForm(CGPointMake(0,
                                         frame.size.height - hypot),
@@ -262,13 +265,6 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 
 - (void)buildRightLayer:(CALayer *)right withFrame:(CGRect)frame
 {
-    [self modifyLayer:right
-          withBGColor:self.color
-          borderColor:self.borderColor
-          borderWidth:self.borderWidth
-         cornerRadius:self.cornerRadius
-              opacity:self.opacity];
-    
     CGFloat hypot = hypotf(frame.size.height, frame.size.width/2.0);
     right.frame = CGRectForm(CGPointMake(frame.size.width,
                                          frame.size.height - hypot),
@@ -286,19 +282,67 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 
 - (void)buildBackLayer:(CALayer *)back withFrame:(CGRect)frame
 {
-    [self modifyLayer:back
-          withBGColor:self.color
-          borderColor:self.borderColor
-          borderWidth:self.borderWidth
-         cornerRadius:self.cornerRadius
-              opacity:self.opacity];
-    
     back.frame = CGRectForm(CGPointMake(0,
-                                        frame.size.height - self.thickness / 2.0),
+                                        frame.size.height - self.thickness /
+                                        2.0),
                             CGSizeMake(frame.size.width,
                                        self.thickness));
     
     back.transform = CATransform3DMakeRotation(M_PI_2, 1, 0, 0);
+}
+
+- (void)buildBackLeftLayer:(CALayer *)backLeft withFrame:(CGRect)frame
+{
+    CGFloat leg1 = frame.size.width / 2.0;
+    CGFloat leg2 = frame.size.height / 4.0;
+    
+    CGFloat hypot = hypotf(leg1, leg2);
+    
+    CGFloat angle = atan(leg2 / leg1);
+    
+    [self setAnchorPoint:CGPointMake(0, 0) forLayer:backLeft];
+    
+    backLeft.frame = CGRectMake(0,
+                                frame.size.height,
+                                hypot,
+                                self.thickness);
+    backLeft.transform = CATransform3DMakeRotation(M_PI_2, 1, 0, 0);
+    backLeft.transform = CATransform3DRotate(backLeft.transform,
+                                             -angle,
+                                             0.0,
+                                             1.0,
+                                             0.0);
+    backLeft.transform = CATransform3DTranslate(backLeft.transform,
+                                                0,
+                                                -self.thickness / 2.0,
+                                                0);
+}
+
+- (void)buildBackRightLayer:(CALayer *)backRight withFrame:(CGRect)frame
+{
+    CGFloat leg1 = frame.size.width / 2.0;
+    CGFloat leg2 = frame.size.height / 4.0;
+    
+    CGFloat hypot = hypotf(leg1, leg2);
+    
+    CGFloat angle = atanf(leg2 / leg1);
+    
+    [self setAnchorPoint:CGPointMake(0, 0) forLayer:backRight];
+    
+    backRight.frame = CGRectMake(frame.size.width,
+                                 frame.size.height,
+                                 hypot,
+                                 self.thickness);
+    backRight.transform = CATransform3DMakeRotation(M_PI_2, 1, 0, 0);
+    backRight.transform = CATransform3DRotate(backRight.transform,
+                                              (angle + M_PI),
+                                              0.0,
+                                              1.0,
+                                              0.0);
+    backRight.transform = CATransform3DTranslate(backRight.transform,
+                                                 0,
+                                                 -self.thickness / 2.0,
+                                                 0);
 }
 
 #pragma mark - CADisplayLink Rendering
@@ -309,7 +353,8 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
     CADisplayLink *link = [CADisplayLink displayLinkWithTarget:self
                                                       selector:@selector(updateArrow:)];
     link.frameInterval = 1;
-    [link addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+    [link addToRunLoop:[NSRunLoop currentRunLoop]
+               forMode:NSRunLoopCommonModes];
 }
 
 - (void)stopPointing
