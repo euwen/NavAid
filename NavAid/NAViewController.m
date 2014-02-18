@@ -9,13 +9,11 @@
 #import "NAViewController.h"
 #import "NAArrowView.h"
 
-// transform values for full screen support
-#define CAMERA_TRANSFORM_X 1
-#define CAMERA_TRANSFORM_Y self.view.frame.size.height / self.view.frame.size.width
-
 @interface NAViewController ()
 
 @property (strong, nonatomic) NAArrowView *arrowView;
+@property (strong, nonatomic) UIImagePickerController *picker;
+
 @property (weak, nonatomic) IBOutlet UIView *controlsView;
 @property (weak, nonatomic) IBOutlet UIView *statusBarView;
 
@@ -31,17 +29,19 @@
     [self.view setTranslatesAutoresizingMaskIntoConstraints:YES];
 }
 
-- (void)viewDidAppear:(BOOL)animated
+- (void)viewWillAppear:(BOOL)animated
 {
-    UIImagePickerController *picker = [[UIImagePickerController alloc] init];
-    picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-    picker.showsCameraControls = NO;
-    picker.navigationBarHidden = YES;
-    picker.toolbarHidden = YES;
-    picker.cameraViewTransform =
-    CGAffineTransformScale(picker.cameraViewTransform,
-                           CAMERA_TRANSFORM_X,
-                           CAMERA_TRANSFORM_Y);
+    self.picker = [[UIImagePickerController alloc] init];
+    self.picker.sourceType = UIImagePickerControllerSourceTypeCamera;
+    self.picker.showsCameraControls = NO;
+    self.picker.navigationBarHidden = YES;
+    self.picker.toolbarHidden = YES;
+    self.picker.cameraViewTransform =
+    CGAffineTransformScale(self.picker.cameraViewTransform,
+                           1.0,
+                           (self.view.frame.size.height -
+                            self.controlsView.frame.size.height) /
+                           self.view.frame.size.width);
     
     UIView *overlayView =
     [[UIView alloc] initWithFrame:self.view.frame];
@@ -53,9 +53,12 @@
     [overlayView addSubview:self.controlsView];
     [overlayView addSubview:self.statusBarView];
     
-    picker.cameraOverlayView = overlayView;
-    
-    [self presentViewController:picker animated:NO completion:nil];
+    self.picker.cameraOverlayView = overlayView;
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [self presentViewController:self.picker animated:NO completion:nil];
 }
 
 #pragma mark - Setup
