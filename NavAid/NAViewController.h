@@ -8,9 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-#import <CoreLocation/CoreLocation.h>
-#import <CoreMotion/CoreMotion.h>
-
-@interface NAViewController : UIViewController <CLLocationManagerDelegate>
+@interface NAViewController : UIViewController
 
 @end

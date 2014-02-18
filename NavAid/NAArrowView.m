@@ -23,7 +23,12 @@
 @property (assign, nonatomic) CGFloat cornerRadius;
 @property (assign, nonatomic) CGFloat borderWidth;
 @property (assign, nonatomic) CGFloat opacity;
+
 @property (assign, nonatomic) BOOL shouldRebuild;
+@property (assign, nonatomic) BOOL isPointing;
+
+@property (strong, nonatomic) CLLocationManager *locManager;
+@property (strong, nonatomic) CMMotionManager *motionManager;
 
 @end
 
@@ -58,8 +63,25 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
         [self setBackgroundColor:[UIColor clearColor]];
         [self setOpaque:NO];
         [self rebuild];
+        
+        self.locManager = [CLLocationManager new];
+        [self prepareAndStartLocationManager:self.locManager withDelegate:self];
+        
+        self.motionManager = [CMMotionManager new];
+        [self.motionManager startDeviceMotionUpdates];
     }
     return self;
+}
+
+- (void)prepareAndStartLocationManager:(CLLocationManager *)locManager
+                          withDelegate:(id<CLLocationManagerDelegate>)delegate
+{
+    locManager.delegate = delegate;
+    locManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation;
+    locManager.headingFilter = kCLHeadingFilterNone;
+    
+    [locManager startUpdatingLocation];
+    [locManager startUpdatingHeading];
 }
 
 - (void)rebuild
@@ -97,7 +119,7 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 
 #pragma mark - Layer Construction
 
-- (void)addTriangleMaskToShapeLayer:(CAShapeLayer *)layer
+- (void)addArrowMaskToShapeLayer:(CAShapeLayer *)layer
 {
     UIBezierPath *shapePath = [UIBezierPath bezierPath];
     [shapePath moveToPoint:CGPointMake(0,
@@ -106,6 +128,8 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
                                           0)];
     [shapePath addLineToPoint:CGPointMake(layer.frame.size.width,
                                           layer.frame.size.height)];
+    [shapePath addLineToPoint:CGPointMake(layer.frame.size.width / 2.0,
+                                          3.0 * layer.frame.size.height / 4.0)];
     [shapePath addLineToPoint:CGPointMake(0,
                                           layer.frame.size.height)];
     
@@ -187,7 +211,7 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
     top.transform = CATransform3DMakeTranslation(0, 0, kArrowThickness / 2.0);
     top.frame = CGRectForm(CGPointMake(0, 0), frame.size);
     
-    [self addTriangleMaskToShapeLayer:top];
+    [self addArrowMaskToShapeLayer:top];
 }
 
 - (void)buildBottomLayer:(CAShapeLayer *)bottom withFrame:(CGRect)frame
@@ -202,7 +226,7 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
     bottom.transform = CATransform3DMakeTranslation(0, 0, -kArrowThickness / 2.0);
     bottom.frame = CGRectForm(CGPointMake(0, 0), frame.size);
     
-    [self addTriangleMaskToShapeLayer:bottom];
+    [self addArrowMaskToShapeLayer:bottom];
 }
 
 - (void)buildLeftLayer:(CALayer *)left withFrame:(CGRect)frame
@@ -266,15 +290,42 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
     back.transform = CATransform3DMakeRotation(M_PI_2, 1, 0, 0);
 }
 
+#pragma mark - CADisplayLink Rendering
+
+- (void)startPointing
+{
+    [self setIsPointing:YES];
+    CADisplayLink *link = [CADisplayLink displayLinkWithTarget:self selector:@selector(updateArrow:)];
+    link.frameInterval = 1;
+    [link addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+}
+
+- (void)stopPointing
+{
+    [self setIsPointing:NO];
+}
+
+- (void)updateArrow:(CADisplayLink *)displayLink
+{
+    if (!self.isPointing) {
+        [displayLink invalidate];
+    }
+    
+    if (self.shouldRebuild) {
+        [self rebuild];
+    }
+    
+    [self pointAtDestination:self.destination
+                withAttitude:self.motionManager.deviceMotion.attitude
+                withLocation:self.locManager.location
+                  andHeading:self.locManager.heading];
+}
+
 - (void)pointAtDestination:(CLLocation *)destination
               withAttitude:(CMAttitude *)attitude
               withLocation:(CLLocation *)location
                 andHeading:(CLHeading *)heading
 {
-    if (self.shouldRebuild) {
-        [self rebuild];
-    }
-    
     double rotationAngle =
     [location bearingInRadiansTowardsLocation:destination] -
     heading.magneticHeading * ((double)M_PI/(double)180.0);

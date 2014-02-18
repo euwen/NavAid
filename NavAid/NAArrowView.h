@@ -11,12 +11,11 @@
 #import <CoreLocation/CoreLocation.h>
 #import <CoreMotion/CoreMotion.h>
 
-@interface NAArrowView : UIView
+@interface NAArrowView : UIView <CLLocationManagerDelegate>
 
-- (void)pointAtDestination:(CLLocation *)destination
-              withAttitude:(CMAttitude *)attitude
-              withLocation:(CLLocation *)location
-                andHeading:(CLHeading *)heading;
+- (void)startPointing;
+- (void)stopPointing;
+- (BOOL)isPointing;
 
 @property (strong, nonatomic) UIColor *color;
 @property (assign, nonatomic) CGFloat thickness;
