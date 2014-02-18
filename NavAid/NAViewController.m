@@ -7,7 +7,8 @@
 //
 
 #import "NAViewController.h"
-#import "NAArrowView.h"
+
+#import "CLLocationManager+AFExtensions.h"
 
 @interface NAViewController ()
 
@@ -16,6 +17,7 @@
 
 @property (weak, nonatomic) IBOutlet UIView *controlsView;
 @property (weak, nonatomic) IBOutlet UIView *statusBarView;
+@property (weak, nonatomic) IBOutlet UILabel *distanceLabel;
 
 @end
 
@@ -52,6 +54,7 @@
     [self setupArrowViewInView:overlayView];
     [overlayView addSubview:self.controlsView];
     [overlayView addSubview:self.statusBarView];
+    [overlayView addSubview:self.distanceLabel];
     
     self.picker.cameraOverlayView = overlayView;
 }
@@ -68,8 +71,9 @@
     CGRect frame = CGRectMake(view.frame.size.width / 6.0,
                               view.frame.size.height / 10.0,
                               4.0 * view.frame.size.width / 6.0,
-                              6.5 * view.frame.size.height / 10.0);
+                              5.5 * view.frame.size.height / 10.0);
     self.arrowView = [[NAArrowView alloc] initWithFrame:frame];
+    self.arrowView.delegate = self;
     [view addSubview:self.arrowView];
 }
 
@@ -90,6 +94,14 @@
         [[CLLocation alloc] initWithLatitude:36.1480013
                                    longitude:-86.8083296];
     }
+}
+
+#pragma mark - NAArrowViewDelegate
+
+- (void)locationManager:(CLLocationManager *)manager
+	 didUpdateLocations:(NSArray *)locations
+{
+    self.distanceLabel.text = [manager distanceToLocation:self.arrowView.destination];
 }
 
 @end

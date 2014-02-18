@@ -11,6 +11,13 @@
 #import <CoreLocation/CoreLocation.h>
 #import <CoreMotion/CoreMotion.h>
 
+@protocol NAArrowViewDelegate <NSObject>
+
+- (void)locationManager:(CLLocationManager *)manager
+	 didUpdateLocations:(NSArray *)locations;
+
+@end
+
 @interface NAArrowView : UIView <CLLocationManagerDelegate>
 
 - (void)startPointing;
@@ -20,5 +27,6 @@
 @property (assign, nonatomic) CGFloat thickness;
 @property (strong, nonatomic) UIColor *color;
 @property (strong, nonatomic) CLLocation *destination;
+@property (assign, nonatomic) id<NAArrowViewDelegate> delegate;
 
 @end

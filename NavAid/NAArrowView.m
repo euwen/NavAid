@@ -401,7 +401,7 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
     // Create 3D Transform based on pitch and roll of device
     CATransform3D transform;
     transform = CATransform3DMakeRotation(attitude.pitch, 1, 0, 0);
-    transform = CATransform3DRotate(transform, attitude.roll, 0, 1, 0);
+    transform = CATransform3DRotate(transform, -attitude.roll, 0, 1, 0);
     transform = CATransform3DRotate(transform, rotationAngle, 0, 0, 1);
     
     // Transform the container
@@ -434,6 +434,14 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 		bearing = bearing - (2 * kPi);
 	}
 	return bearing;
+}
+
+#pragma mark - CLLocationManagerDelegate
+
+- (void)locationManager:(CLLocationManager *)manager
+	 didUpdateLocations:(NSArray *)locations __OSX_AVAILABLE_STARTING(__MAC_NA,__IPHONE_6_0)
+{
+    [self.delegate locationManager:manager didUpdateLocations:locations];
 }
 
 @end

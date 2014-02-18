@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface NAViewController : UIViewController
+#import "NAArrowView.h"
+
+@interface NAViewController : UIViewController <NAArrowViewDelegate>
 
 @end
