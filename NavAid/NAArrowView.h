@@ -17,9 +17,8 @@
 - (void)stopPointing;
 - (BOOL)isPointing;
 
-@property (strong, nonatomic) UIColor *color;
 @property (assign, nonatomic) CGFloat thickness;
-
+@property (strong, nonatomic) UIColor *color;
 @property (strong, nonatomic) CLLocation *destination;
 
 @end

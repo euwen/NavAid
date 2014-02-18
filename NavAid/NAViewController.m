@@ -7,9 +7,7 @@
 //
 
 #import "NAViewController.h"
-
 #import "NAArrowView.h"
-#import "CLLocation+AFExtensions.h"
 
 // transform values for full screen support
 #define CAMERA_TRANSFORM_X 1
@@ -19,22 +17,18 @@
 
 @property (strong, nonatomic) NAArrowView *arrowView;
 @property (weak, nonatomic) IBOutlet UIView *controlsView;
+@property (weak, nonatomic) IBOutlet UIView *statusBarView;
 
 @end
 
 @implementation NAViewController
 
+#pragma mark - Lifecycle
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
     [self.view setTranslatesAutoresizingMaskIntoConstraints:YES];
-}
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -57,6 +51,7 @@
     
     [self setupArrowViewInView:overlayView];
     [overlayView addSubview:self.controlsView];
+    [overlayView addSubview:self.statusBarView];
     
     picker.cameraOverlayView = overlayView;
     
@@ -84,13 +79,13 @@
     }
     
     if ([sender.titleLabel.text isEqualToString:@"Featheringill Hall"]) {
-        self.arrowView.destination = [CLLocation locationWithCoordinate:
-                                      CLLocationCoordinate2DMake(36.1447809,
-                                                                 -86.8032186)];
+        self.arrowView.destination =
+        [[CLLocation alloc] initWithLatitude:36.1447809
+                                   longitude:-86.8032186];
     } else if ([sender.titleLabel.text isEqualToString:@"Roma"]) {
-        self.arrowView.destination = [CLLocation locationWithCoordinate:
-                                      CLLocationCoordinate2DMake(36.1480013,
-                                                                 -86.8083296)];
+        self.arrowView.destination =
+        [[CLLocation alloc] initWithLatitude:36.1480013
+                                   longitude:-86.8083296];
     }
 }
 

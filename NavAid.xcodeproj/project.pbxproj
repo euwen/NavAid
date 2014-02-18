@@ -23,9 +23,9 @@
 		520BF89418A3ED0D00459308 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 520BF89218A3ED0D00459308 /* InfoPlist.strings */; };
 		520BF89618A3ED0D00459308 /* NavAidTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 520BF89518A3ED0D00459308 /* NavAidTests.m */; };
 		520BF8A018A3ED5600459308 /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 520BF89F18A3ED5600459308 /* CoreMotion.framework */; };
-		520BF8A318A3F05000459308 /* CLLocation+AFExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 520BF8A218A3F05000459308 /* CLLocation+AFExtensions.m */; };
 		520BF8A618A3F0DF00459308 /* CLLocationManager+AFExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 520BF8A518A3F0DF00459308 /* CLLocationManager+AFExtensions.m */; };
 		521A361918B16E8600F01C9D /* NAArrowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 521A361818B16E8600F01C9D /* NAArrowView.m */; };
+		52D81F0818B3DC440031A4F6 /* CLLocation+AFExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 52D81F0718B3DC440031A4F6 /* CLLocation+AFExtensions.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,12 +60,12 @@
 		520BF89318A3ED0D00459308 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		520BF89518A3ED0D00459308 /* NavAidTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NavAidTests.m; sourceTree = "<group>"; };
 		520BF89F18A3ED5600459308 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
-		520BF8A118A3F05000459308 /* CLLocation+AFExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CLLocation+AFExtensions.h"; sourceTree = "<group>"; };
-		520BF8A218A3F05000459308 /* CLLocation+AFExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CLLocation+AFExtensions.m"; sourceTree = "<group>"; };
 		520BF8A418A3F0D500459308 /* CLLocationManager+AFExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CLLocationManager+AFExtensions.h"; sourceTree = "<group>"; };
 		520BF8A518A3F0DF00459308 /* CLLocationManager+AFExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CLLocationManager+AFExtensions.m"; sourceTree = "<group>"; };
 		521A361718B16E8600F01C9D /* NAArrowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NAArrowView.h; sourceTree = "<group>"; };
 		521A361818B16E8600F01C9D /* NAArrowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NAArrowView.m; sourceTree = "<group>"; };
+		52D81F0618B3DC440031A4F6 /* CLLocation+AFExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CLLocation+AFExtensions.h"; sourceTree = "<group>"; };
+		52D81F0718B3DC440031A4F6 /* CLLocation+AFExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CLLocation+AFExtensions.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,8 +135,8 @@
 				520BF88018A3ED0D00459308 /* NAViewController.m */,
 				521A361718B16E8600F01C9D /* NAArrowView.h */,
 				521A361818B16E8600F01C9D /* NAArrowView.m */,
-				520BF8A118A3F05000459308 /* CLLocation+AFExtensions.h */,
-				520BF8A218A3F05000459308 /* CLLocation+AFExtensions.m */,
+				52D81F0618B3DC440031A4F6 /* CLLocation+AFExtensions.h */,
+				52D81F0718B3DC440031A4F6 /* CLLocation+AFExtensions.m */,
 				520BF8A418A3F0D500459308 /* CLLocationManager+AFExtensions.h */,
 				520BF8A518A3F0DF00459308 /* CLLocationManager+AFExtensions.m */,
 				520BF88218A3ED0D00459308 /* Images.xcassets */,
@@ -278,9 +278,9 @@
 			files = (
 				520BF8A618A3F0DF00459308 /* CLLocationManager+AFExtensions.m in Sources */,
 				520BF88118A3ED0D00459308 /* NAViewController.m in Sources */,
+				52D81F0818B3DC440031A4F6 /* CLLocation+AFExtensions.m in Sources */,
 				520BF87418A3ED0D00459308 /* main.m in Sources */,
 				521A361918B16E8600F01C9D /* NAArrowView.m in Sources */,
-				520BF8A318A3F05000459308 /* CLLocation+AFExtensions.m in Sources */,
 				520BF87818A3ED0D00459308 /* NAAppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

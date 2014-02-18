@@ -8,7 +8,7 @@
 
 #import "NAArrowView.h"
 
-#import "CLLocation+AFExtensions.h"
+#define kPi 3.141592653589793
 
 @interface NAArrowView ()
 
@@ -37,11 +37,15 @@
 static const CGFloat kArrowThickness = 30;
 static const CGFloat kArrowBorderWidth = 3.0;
 static const CGFloat kArrowCornerRadius = 3.0;
-static const CGFloat kArrowOpacity = 0.4;
+static const CGFloat kArrowOpacity = 0.8;
 
 @implementation NAArrowView
 
 #pragma mark - C Functions
+
+// got these from: http://blog.digitalagua.com/2008/06/30/how-to-convert-degrees-to-radians-radians-to-degrees-in-objective-c/
+CGFloat DegToRad(CGFloat degrees) { return degrees * M_PI / 180; };
+CGFloat RadToDeg(CGFloat radians) { return radians * 180 / M_PI; };
 
 CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 {
@@ -58,6 +62,7 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
     self = [super initWithFrame:frame];
     if (self) {
         [self setColor:[UIColor blackColor]];
+        [self setBorderColor:[UIColor whiteColor]];
         [self setThickness:kArrowThickness];
         [self setBorderWidth:kArrowBorderWidth];
         [self setCornerRadius:kArrowCornerRadius];
@@ -111,6 +116,7 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
              cornerRadius:self.cornerRadius
                   opacity:self.opacity];
         layer.shouldRasterize = YES;
+        layer.rasterizationScale = [UIScreen mainScreen].scale;
         layer.drawsAsynchronously = YES;
     }
     
@@ -128,10 +134,12 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 - (void)setColor:(UIColor *)color
 {
     _color = color;
-    _borderColor = [UIColor colorWithRed:34.0/242.0
-                                   green:169.0/242.0
-                                    blue:242.0/242.0
-                                   alpha:1.0];
+    self.shouldRebuild = YES;
+}
+
+- (void)setBorderColor:(UIColor *)borderColor
+{
+    _borderColor = borderColor;
     self.shouldRebuild = YES;
 }
 
@@ -378,13 +386,16 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
                   andHeading:self.locManager.heading];
 }
 
+#pragma mark - Location Math
+
 - (void)pointAtDestination:(CLLocation *)destination
               withAttitude:(CMAttitude *)attitude
               withLocation:(CLLocation *)location
                 andHeading:(CLHeading *)heading
 {
     double rotationAngle =
-    [location bearingInRadiansTowardsLocation:destination] -
+    [self bearingInRadiansFromLocation:location
+                       towardsLocation:destination] -
     heading.magneticHeading * ((double)M_PI/(double)180.0);
 
     // Create 3D Transform based on pitch and roll of device
@@ -395,6 +406,34 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
     
     // Transform the container
     self.container.transform = transform;
+}
+
+// Calculate the bearing in the direction of towardsLocation
+// from this location's coordinate
+// Formula:	θ =	atan2(sin(Δlong).cos(lat2),
+//                    cos(lat1).sin(lat2) − sin(lat1).cos(lat2).cos(Δlong))
+// Based on the formula as described at
+// http://www.movable-type.co.uk/scripts/latlong.html
+
+// Original JavaScript implementation © 2002-2006 Chris Veness
+// Original Objetive-C implementation created by Mattt Thompson on 10/06/29.
+// Copyright 2010 Mattt Thompson. All rights reserved.
+- (double)bearingInRadiansFromLocation:(CLLocation *)location
+                       towardsLocation:(CLLocation *)towardsLocation {
+	double lat1 = DegToRad(location.coordinate.latitude);
+	double lon1 = DegToRad(location.coordinate.longitude);
+	double lat2 = DegToRad(towardsLocation.coordinate.latitude);
+	double lon2 = DegToRad(towardsLocation.coordinate.longitude);
+	double dLon = lon2 - lon1;
+	double y = sin(dLon) * cos(lat2);
+	double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+	double bearing = atan2(y, x) + (2 * kPi);
+	// atan2 works on a range of -π to 0 to π,
+    // so add on 2π and perform a modulo check
+	if (bearing > (2 * kPi)) {
+		bearing = bearing - (2 * kPi);
+	}
+	return bearing;
 }
 
 @end
