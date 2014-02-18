@@ -18,4 +18,9 @@
               withLocation:(CLLocation *)location
                 andHeading:(CLHeading *)heading;
 
+@property (strong, nonatomic) UIColor *color;
+@property (assign, nonatomic) CGFloat thickness;
+
+@property (strong, nonatomic) CLLocation *destination;
+
 @end

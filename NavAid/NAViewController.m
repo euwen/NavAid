@@ -13,7 +13,6 @@
 
 @interface NAViewController ()
 
-@property (weak, nonatomic) IBOutlet UIImageView *arrowImageView;
 @property (strong, nonatomic) CLLocationManager *locManager;
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (strong, nonatomic) CLLocation *destination;
