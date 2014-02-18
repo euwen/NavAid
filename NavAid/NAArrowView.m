@@ -125,6 +125,11 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 
 #pragma mark - Accessors/Mutators
 
+- (CLLocationManager *)locationManager
+{
+    return self.locManager;
+}
+
 - (void)setFrame:(CGRect)frame
 {
     [super setFrame:frame];

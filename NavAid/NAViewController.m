@@ -81,10 +81,6 @@
 
 - (IBAction)buttonPressed:(UIButton *)sender
 {
-    if (!self.arrowView.isPointing) {
-        [self.arrowView startPointing];
-    }
-    
     if ([sender.titleLabel.text isEqualToString:@"Featheringill Hall"]) {
         self.arrowView.destination =
         [[CLLocation alloc] initWithLatitude:36.1447809
@@ -93,6 +89,16 @@
         self.arrowView.destination =
         [[CLLocation alloc] initWithLatitude:36.1480013
                                    longitude:-86.8083296];
+    } else if ([sender.titleLabel.text isEqualToString:@"Ben & Jerry's"]) {
+        self.arrowView.destination =
+        [[CLLocation alloc] initWithLatitude:36.146143
+                                   longitude:-86.7994725];
+    }
+    
+    self.distanceLabel.text = [self.arrowView.locationManager distanceToLocation:self.arrowView.destination];
+    
+    if (!self.arrowView.isPointing) {
+        [self.arrowView startPointing];
     }
 }
 

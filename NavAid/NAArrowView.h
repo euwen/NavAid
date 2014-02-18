@@ -23,6 +23,7 @@
 - (void)startPointing;
 - (void)stopPointing;
 - (BOOL)isPointing;
+- (CLLocationManager *)locationManager;
 
 @property (assign, nonatomic) CGFloat thickness;
 @property (strong, nonatomic) UIColor *color;
