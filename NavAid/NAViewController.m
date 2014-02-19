@@ -93,6 +93,10 @@
         self.arrowView.destination =
         [[CLLocation alloc] initWithLatitude:36.146143
                                    longitude:-86.7994725];
+    } else if ([sender.titleLabel.text isEqualToString:@"Qdoba"]) {
+        self.arrowView.destination =
+        [[CLLocation alloc] initWithLatitude:36.1504781
+                                   longitude:-86.8008202];
     }
     
     self.distanceLabel.text = [self.arrowView.locationManager distanceToLocation:self.arrowView.destination];

@@ -424,7 +424,7 @@
 				GCC_PREFIX_HEADER = "NavAid/NavAid-Prefix.pch";
 				INFOPLIST_FILE = "NavAid/NavAid-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "7AD9AA77-34BB-4424-BAEC-08D9CB0CB333";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -440,7 +440,7 @@
 				GCC_PREFIX_HEADER = "NavAid/NavAid-Prefix.pch";
 				INFOPLIST_FILE = "NavAid/NavAid-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "7AD9AA77-34BB-4424-BAEC-08D9CB0CB333";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

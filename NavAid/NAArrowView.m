@@ -28,6 +28,7 @@
 
 @property (assign, nonatomic) BOOL shouldRebuild;
 @property (assign, nonatomic) BOOL isPointing;
+@property (assign, nonatomic) BOOL isBouncing;
 
 @property (strong, nonatomic) CLLocationManager *locManager;
 @property (strong, nonatomic) CMMotionManager *motionManager;
@@ -43,7 +44,6 @@ static const CGFloat kArrowOpacity = 0.8;
 
 #pragma mark - C Functions
 
-// got these from: http://blog.digitalagua.com/2008/06/30/how-to-convert-degrees-to-radians-radians-to-degrees-in-objective-c/
 CGFloat DegToRad(CGFloat degrees) { return degrees * M_PI / 180; };
 CGFloat RadToDeg(CGFloat radians) { return radians * 180 / M_PI; };
 
@@ -95,6 +95,9 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 - (void)rebuild
 {
     for (CALayer *layer in self.layer.sublayers) {
+        for (CALayer *sublayer in layer.sublayers) {
+            [sublayer removeFromSuperlayer];
+        }
         [layer removeFromSuperlayer];
     }
     
@@ -152,6 +155,12 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 {
     _thickness = thickness;
     self.shouldRebuild = YES;
+}
+
+- (void)setDestination:(CLLocation *)destination
+{
+    _destination = destination;
+    [self checkBounce];
 }
 
 #pragma mark - Layer Construction
@@ -317,7 +326,7 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
     
     backLeft.frame = CGRectMake(0,
                                 frame.size.height,
-                                hypot,
+                                hypot*1.01,
                                 self.thickness);
     backLeft.transform = CATransform3DMakeRotation(M_PI_2, 1, 0, 0);
     backLeft.transform = CATransform3DRotate(backLeft.transform,
@@ -344,7 +353,7 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
     
     backRight.frame = CGRectMake(frame.size.width,
                                  frame.size.height,
-                                 hypot,
+                                 hypot*1.01,
                                  self.thickness);
     backRight.transform = CATransform3DMakeRotation(M_PI_2, 1, 0, 0);
     backRight.transform = CATransform3DRotate(backRight.transform,
@@ -363,8 +372,9 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 - (void)startPointing
 {
     [self setIsPointing:YES];
-    CADisplayLink *link = [CADisplayLink displayLinkWithTarget:self
-                                                      selector:@selector(updateArrow:)];
+    CADisplayLink *link =
+    [CADisplayLink displayLinkWithTarget:self
+                                selector:@selector(updateArrow:)];
     link.frameInterval = 1;
     [link addToRunLoop:[NSRunLoop currentRunLoop]
                forMode:NSRunLoopCommonModes];
@@ -385,10 +395,24 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
         [self rebuild];
     }
     
-    [self pointAtDestination:self.destination
-                withAttitude:self.motionManager.deviceMotion.attitude
-                withLocation:self.locManager.location
-                  andHeading:self.locManager.heading];
+    if (self.isBouncing) {
+        [self bounceArrowWithAttitude:self.motionManager.deviceMotion.attitude];
+    } else {
+        [self pointAtDestination:self.destination
+                    withAttitude:self.motionManager.deviceMotion.attitude
+                    withLocation:self.locManager.location
+                      andHeading:self.locManager.heading];
+    }
+
+}
+
+- (void)bounceArrowWithAttitude:(CMAttitude *)attitude
+{
+    CATransform3D transform;
+    transform = CATransform3DMakeRotation(M_PI_2, 1, 0, 0);
+    transform = CATransform3DRotate(transform, attitude.pitch, 1, 0, 0);
+    transform = CATransform3DRotate(transform, -attitude.roll, 0, 1, 0);
+    self.container.transform = transform;
 }
 
 #pragma mark - Location Math
@@ -403,13 +427,11 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
                        towardsLocation:destination] -
     heading.magneticHeading * ((double)M_PI/(double)180.0);
 
-    // Create 3D Transform based on pitch and roll of device
     CATransform3D transform;
     transform = CATransform3DMakeRotation(attitude.pitch, 1, 0, 0);
     transform = CATransform3DRotate(transform, -attitude.roll, 0, 1, 0);
     transform = CATransform3DRotate(transform, rotationAngle, 0, 0, 1);
     
-    // Transform the container
     self.container.transform = transform;
 }
 
@@ -424,28 +446,38 @@ CG_INLINE CGRect CGRectForm(CGPoint p, CGSize s)
 // Original Objetive-C implementation created by Mattt Thompson on 10/06/29.
 // Copyright 2010 Mattt Thompson. All rights reserved.
 - (double)bearingInRadiansFromLocation:(CLLocation *)location
-                       towardsLocation:(CLLocation *)towardsLocation {
-	double lat1 = DegToRad(location.coordinate.latitude);
-	double lon1 = DegToRad(location.coordinate.longitude);
-	double lat2 = DegToRad(towardsLocation.coordinate.latitude);
-	double lon2 = DegToRad(towardsLocation.coordinate.longitude);
-	double dLon = lon2 - lon1;
-	double y = sin(dLon) * cos(lat2);
-	double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
-	double bearing = atan2(y, x) + (2 * kPi);
-	// atan2 works on a range of -π to 0 to π,
+                       towardsLocation:(CLLocation *)towardsLocation
+{
+    double lat1 = DegToRad(location.coordinate.latitude);
+    double lon1 = DegToRad(location.coordinate.longitude);
+    double lat2 = DegToRad(towardsLocation.coordinate.latitude);
+    double lon2 = DegToRad(towardsLocation.coordinate.longitude);
+    double dLon = lon2 - lon1;
+    double y = sin(dLon) * cos(lat2);
+    double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+    double bearing = atan2(y, x) + (2 * kPi);
+    // atan2 works on a range of -π to 0 to π,
     // so add on 2π and perform a modulo check
-	if (bearing > (2 * kPi)) {
-		bearing = bearing - (2 * kPi);
-	}
-	return bearing;
+    if (bearing > (2 * kPi)) {
+        bearing = bearing - (2 * kPi);
+    }
+    return bearing;
+}
+
+- (void)checkBounce
+{
+    if ([self.locationManager.location
+         distanceFromLocation:self.destination] <= 30) {
+        self.isBouncing = YES;
+    } else if (self.isBouncing) self.isBouncing = NO;
 }
 
 #pragma mark - CLLocationManagerDelegate
 
 - (void)locationManager:(CLLocationManager *)manager
-	 didUpdateLocations:(NSArray *)locations __OSX_AVAILABLE_STARTING(__MAC_NA,__IPHONE_6_0)
+	 didUpdateLocations:(NSArray *)locations
 {
+    [self checkBounce];
     [self.delegate locationManager:manager didUpdateLocations:locations];
 }
 
