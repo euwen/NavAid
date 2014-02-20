@@ -18,6 +18,7 @@
 @property (weak, nonatomic) IBOutlet UIView *controlsView;
 @property (weak, nonatomic) IBOutlet UIView *statusBarView;
 @property (weak, nonatomic) IBOutlet UILabel *distanceLabel;
+@property (weak, nonatomic) IBOutlet UILabel *locationLabel;
 
 @end
 
@@ -55,6 +56,7 @@
     [overlayView addSubview:self.controlsView];
     [overlayView addSubview:self.statusBarView];
     [overlayView addSubview:self.distanceLabel];
+    [overlayView addSubview:self.locationLabel];
     
     self.picker.cameraOverlayView = overlayView;
 }
@@ -99,6 +101,7 @@
                                    longitude:-86.8008202];
     }
     
+    self.locationLabel.text = sender.titleLabel.text;
     self.distanceLabel.text = [self.arrowView.locationManager distanceToLocation:self.arrowView.destination];
     
     if (!self.arrowView.isPointing) {
